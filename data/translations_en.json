@@ -1,0 +1,40 @@
+{
+  "_note": "English translations written for this extraction; the site itself only provides English names for 6 items (stored as name_en_site).",
+  "categories": {
+    "0": "Chicken Shawarma", "1": "Beef Shawarma", "2": "Snacks", "3": "Offers (Grills & Chicken)",
+    "4": "Appetizers & Sides", "5": "Pastries", "6": "Daily Meals", "7": "Group Offers",
+    "8": "Add-ons", "9": "Drinks"
+  },
+  "items": {
+    "1543": "Arabic Chicken Shawarma Meal", "1544": "Double Chicken Shawarma Meal", "1545": "Chicken Shawarma Plate",
+    "1546": "Super Chicken Shawarma Meal", "1613": "Chicken Shawarma in Iraqi Samoon Bread", "1673": "Shawarma by Weight (1 kg)",
+    "1959": "Family Chicken Shawarma Meal",
+    "1547": "Beef Shawarma in Iraqi Samoon Bread", "1548": "Small Beef Shawarma Wrap", "1550": "Arabic Beef Shawarma Meal",
+    "1551": "Super Beef Shawarma Meal", "1552": "Double Beef Shawarma Meal", "1553": "Beef Shawarma Plate", "1674": "Arayes",
+    "1556": "Zinger Sandwich", "1557": "Zinger Meal", "1558": "Beef Burger Sandwich", "1559": "Beef Burger Meal",
+    "1560": "Chicken Escalope Sandwich", "1561": "Chicken Escalope Meal",
+    "1615": "Kofta in a Tray (1 kg)", "1617": "Rotisserie Grilled Chicken", "1618": "Stuffed Chicken", "1619": "Charcoal Chicken",
+    "1620": "Half Rotisserie Chicken", "1621": "Half Charcoal Chicken", "1622": "Broasted Chicken", "1623": "Half Broasted Chicken",
+    "1624": "Mjarmasheh", "1625": "Mashawi (Grill) Sandwich", "1968": "Mixed Grill (1/4 kg)", "1969": "Mixed Grill (1/2 kg)",
+    "1970": "Mixed Grill (3/4 kg)", "1971": "Mixed Grill (1 kg)",
+    "1563": "Hummus", "1564": "Mutabbal", "1565": "Tabbouleh", "1566": "Kishkeh", "1567": "Muhammara", "1568": "Baba Ghanoush",
+    "1569": "Arabic Salad", "1570": "Fattoush", "1574": "Mixed Appetizer Plate (1200 ml)", "1575": "Mixed Appetizer Plate (1800 ml)",
+    "1610": "Yalanji (Stuffed Vine Leaves)", "1960": "French Fries (Small)", "1961": "French Fries (Large)", "1962": "Rice Plate",
+    "1963": "Large Rice",
+    "1579": "Tomato Sfiha", "1580": "Laban (Yogurt) Sfiha", "1581": "Cheese Fatayer", "1582": "Spinach Pastry", "1583": "Za'atar Pastry",
+    "1584": "Kashkaval with Olives", "1585": "Yellow Cheese Pastry", "1586": "Kashkaval & Mortadella Pastry", "1587": "Cheese Sambousek",
+    "1588": "Meat Sambousek", "1589": "Pizza Pastry", "1590": "Sujuk Pastry", "1591": "Fried Kibbeh", "1592": "Za'atar & Cheese Pastry",
+    "1593": "Lahm bi Ajeen (Meat Pastry)", "1594": "Muhammara & Kashkaval Pastry", "1595": "Family Pizza", "1596": "Potato Pastry",
+    "1626": "Senyora Pastry", "1627": "Shish Pastry", "1628": "Mexican Pastry", "1629": "Musakhan", "1630": "Manakish",
+    "1631": "Freekeh with Chicken", "1632": "Bukhari Rice with Chicken", "1633": "Kibbeh Labanieh", "1634": "Jordanian Mansaf with Lamb",
+    "1635": "Super Jordanian Mansaf", "1636": "White Beans with Meat", "1637": "Ouzi Parcels", "1638": "Stuffed Lamb",
+    "1639": "Okra with Meat", "1640": "Eggplant Maqluba with Chicken", "1641": "Mulukhiyah with Chicken", "1729": "Whole Turkey",
+    "1964": "Grilled Za'atar Chicken Wrapped in Toasted Shrak Bread",
+    "1600": "Twenty Mixed Grill Meal", "1601": "Chicken Offer for Ten", "1602": "Twenty Broasted Meal",
+    "1966": "Cheese", "1967": "Garlic Sauce (Toum)",
+    "1605": "Matrix Orange", "1606": "Matrix Seven (Lemon-Lime)", "1607": "Matrix Cola", "1608": "Ayran Yogurt Drink (300 ml)",
+    "1609": "Ayran Yogurt Drink (100 ml)"
+  },
+  "extras": {"كبير": "Large", "شقف": "Shqaf (meat cubes)", "كباب": "Kebab", "شيش طاووق / سيخين": "Shish Tawook (2 skewers)",
+    "زعتر": "Za'atar", "جبنة": "Cheese", "مكس اجبان": "Mixed cheeses", "مرتديلا": "Mortadella", "بيض": "Egg"}
+}
