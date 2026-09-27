@@ -1,0 +1,11 @@
+// Cloudflare Workers config: serves the static menu in ./site
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "alneran",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./site",
+    // Unknown paths (e.g. a mistyped card link) still open the menu
+    "not_found_handling": "single-page-application"
+  }
+}
