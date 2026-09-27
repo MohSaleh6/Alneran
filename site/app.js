@@ -72,53 +72,37 @@
   const money = (p) => `<span class="num">${p.toFixed(2)}</span><small>${t("cur")}</small>`;
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* ---------------- Logo (vector, animated) ---------------- */
-  const flame = (x, base, h, w, lean) => {
-    const l = x - w / 2, r = x + w / 2, tx = x + lean, ty = base - h;
-    return `M${l} ${base}C${l} ${base - h * 0.45} ${tx - w * 0.2} ${base - h * 0.72} ${tx} ${ty}C${tx + w * 0.4} ${base - h * 0.6} ${r} ${base - h * 0.42} ${r} ${base}C${r} ${base + w * 0.5} ${l} ${base + w * 0.5} ${l} ${base}Z`;
-  };
-  const EGG = "M84 44C56 52 38 82 38 120C38 162 66 194 100 194C136 194 162 164 162 122C162 104 158 90 151 79L174 67L147 63C139 50 125 42 110 41";
-  const WING = "M104 172C78 170 57 151 55 115C64 132 76 142 90 146C80 134 73 121 73 104C84 125 98 138 117 142C115 157 111 166 104 172Z";
-  let logoN = 0;
-  function logoSVG(kind) {
-    const id = `l${++logoN}`;
-    const full = kind === "full";
-    const heat = full && !reduceMotion
-      ? `<filter id="${id}h" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.018 0.07" numOctaves="1" seed="4"><animate attributeName="baseFrequency" dur="5s" values="0.018 0.07;0.024 0.1;0.018 0.07" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="6"/></filter>`
-      : "";
-    const sparks = full ? `<g class="sparks" fill="#ffd45a">${[[92, 16, -8, 0], [104, 6, 5, 0.9], [118, 20, 9, 1.7], [98, 26, -3, 2.3], [112, 10, -6, 1.2]].map(([x, y, dx, d]) => `<circle cx="${x}" cy="${y}" r="1.7" style="--dx:${dx}px;animation-delay:${d}s"/>`).join("")}</g>` : "";
-    const word = full ? `<text class="word" x="100" y="252" text-anchor="middle" font-family="'Baloo Bhaijaan 2', Tajawal, sans-serif" font-weight="800" font-size="64" fill="url(#${id}w)" stroke="#8f230b" stroke-width="5" stroke-linejoin="round" paint-order="stroke">النيران</text>` : "";
-    return `<svg class="logo-svg" viewBox="${full ? "20 -8 160 282" : "30 0 150 200"}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a1f"/><stop offset=".45" stop-color="#ffc22e"/><stop offset="1" stop-color="#ffe98a"/></linearGradient>
-        <linearGradient id="${id}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe27a"/><stop offset=".5" stop-color="#ffc02e"/><stop offset="1" stop-color="#f7901f"/></linearGradient>
-        <linearGradient id="${id}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe98a"/><stop offset=".6" stop-color="#ffc22e"/><stop offset="1" stop-color="#ff9b24"/></linearGradient>
-        <radialGradient id="${id}c" cx=".5" cy=".75" r=".6"><stop offset="0" stop-color="#fff8d6"/><stop offset="1" stop-color="#ffe27a" stop-opacity="0"/></radialGradient>
-        ${heat}
-      </defs>
-      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path class="egg-back egg-path" d="${EGG}" stroke-width="14"/>
-        <path class="egg-path" d="${EGG}" stroke="url(#${id}s)" stroke-width="8"/>
-      </g>
-      <g class="flames-g"${heat ? ` filter="url(#${id}h)"` : ""}>
-        <g stroke="#b8350f" stroke-width="3" stroke-linejoin="round" fill="url(#${id}f)">
-          <path class="flame comb-1" d="${flame(88, 48, 36, 17, -5)}"/>
-          <path class="flame comb-3" d="${flame(118, 49, 30, 14, 8)}"/>
-          <path class="flame comb-2" d="${flame(103, 46, 46, 19, 3)}"/>
-          <path class="flame inner" d="${flame(111, 130, 68, 17, -7)}"/>
-          <path class="flame wing" d="${WING}"/>
-        </g>
-        <path class="flame core" d="${flame(111, 126, 34, 8, -4)}" fill="url(#${id}c)"/>
-        <path class="flame core" d="${flame(103, 44, 22, 8, 2)}" fill="url(#${id}c)"/>
-      </g>
-      ${sparks}${word}
-    </svg>`;
+  /* ---------------- Logo (the real artwork, animated as fire) ---------------- */
+  // img/logo.webp is 616x972: emblem on top, wordmark below. Flame tips are used for sparks.
+  const SPARKS = [[268, 40, -14, 0], [164, 84, -8, 0.7], [300, 120, 10, 1.4], [470, 250, 16, 0.4], [420, 190, 6, 2.0], [230, 60, -4, 1.1], [330, 150, 12, 2.5]];
+  function logoFull() {
+    const heat = reduceMotion ? "" : `
+        <filter id="heat" x="-8%" y="-8%" width="116%" height="116%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.011 0.034" numOctaves="2" seed="7">
+            <animate attributeName="baseFrequency" dur="4.5s" values="0.011 0.034;0.014 0.05;0.011 0.034" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" scale="11" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>`;
+    return `<div class="logo-glow"></div>
+      <div class="logo-stack">
+        <svg class="logo-svg" viewBox="0 0 616 972" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>${heat}
+            <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".48" stop-color="#fff"/><stop offset=".7" stop-color="#000"/></linearGradient>
+            <mask id="topMask" maskUnits="userSpaceOnUse" x="0" y="0" width="616" height="972"><rect width="616" height="972" fill="url(#fade)"/></mask>
+          </defs>
+          <image href="/img/logo.webp" width="616" height="972"/>
+          ${heat ? `<g mask="url(#topMask)"><image href="/img/logo.webp" width="616" height="972" filter="url(#heat)"/></g>` : ""}
+          <g class="sparks">${SPARKS.map(([x, y, dx, d]) => `<circle cx="${x}" cy="${y}" r="5" style="--dx:${dx}px;animation-delay:${d}s"/>`).join("")}</g>
+        </svg>
+        <div class="logo-shimmer"></div>
+      </div>
+      <div class="logo-latin">ALNERAN</div>`;
   }
-  const phLogo = `<svg viewBox="30 0 150 200" aria-hidden="true"><path d="${EGG}" fill="none" stroke="#f57a1f" stroke-opacity=".55" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><g fill="#f57a1f" fill-opacity=".5"><path d="${flame(88, 48, 36, 17, -5)}"/><path d="${flame(103, 46, 46, 19, 3)}"/><path d="${flame(118, 49, 30, 14, 8)}"/><path d="${flame(111, 130, 68, 17, -7)}"/><path d="${WING}"/></g></svg>`;
+  const phLogo = `<span class="ph-mark" aria-hidden="true"></span>`;
   function mountLogos() {
     $$("[data-logo]").forEach((el) => {
       el.classList.add(`logo-${el.dataset.logo}`);
-      el.innerHTML = logoSVG(el.dataset.logo);
+      el.innerHTML = el.dataset.logo === "full" ? logoFull() : `<img src="/img/logo-mark.webp" alt="" width="568" height="744">`;
     });
   }
 

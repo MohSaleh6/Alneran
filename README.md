@@ -7,7 +7,7 @@ It is a static website in [`site/`](site), with no build step and no server code
 ## What it does
 
 - **Arabic first, with an English toggle.** The choice is remembered, and Arabic is laid out right-to-left.
-- **Animated logo and background.** The logo is redrawn as a vector: the outline draws itself, the flames flicker with a heat-haze effect, and sparks rise. The background is a dark fire glow with drifting embers and a faint Levantine star pattern.
+- **Animated logo and background.** The logo is the restaurant's real artwork, cut out of its red background by [`scripts/make_logo.py`](scripts/make_logo.py). It lights up on load, and a heat-haze distortion makes the flames move. A band of light rises through the logo, its glow flickers, and sparks fly from the flame tips. The background is a dark fire glow with drifting embers and a faint Levantine star pattern.
 - **Full menu.** 94 dishes in 10 categories, with photos and prices. A sticky category bar follows your scroll, and search works in Arabic and English.
 - **"Most loved" and "dish of the day".** Most-loved dishes are based on Google Maps reviews. The dish of the day shows automatically on its day: mulukhiyah on Thursday, maqluba and white beans on Friday.
 - **Live open/closed status.** Based on Amman time and the Google Maps hours (08:00–02:00 daily).
@@ -45,13 +45,13 @@ To deploy from a terminal instead, run `npx wrangler login` and then `npx wrangl
 
 To preview locally: `cd site && python3 -m http.server 8787`, then open http://localhost:8787/?t=5.
 
-## Please confirm with the restaurant
+## Confirmed with the restaurant
 
-- **Ayran prices:** 300 ml is 0.65 but 100 ml is 1.50. The second is probably 1 litre or a typo.
-- **Mashawi sandwich:** the old menu priced kebab at 2.13 and shqaf/shish tawook at 2.15.
-- **Descriptions:** I wrote or cleaned up many of them. The restaurant should check them.
-- **WhatsApp:** 079 606 6499 needs to be a WhatsApp number for ordering to work.
-- **Logo:** it is a vector re-creation of the logo. If the restaurant has the original file (AI, SVG or PDF), it can replace it.
+- The WhatsApp orders number is 079 606 6499.
+- The large ayran is **1 litre for 1.50**. The old menu said "100 ml".
+- The mashawi sandwich prices stay as they were: kebab 2.13, shqaf and shish tawook 2.15.
+- The rewritten descriptions are approved.
+- The original logo (`data/images/alneran-logo-original.webp`) is used on the site. To regenerate the logo images and icons, run `python3 scripts/make_logo.py`.
 
 ## Source data: the old besmartjo menu
 

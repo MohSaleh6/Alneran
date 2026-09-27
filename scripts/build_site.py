@@ -172,8 +172,8 @@ SIZES = {
 # Two separate items merged into one with size choices: kept id -> (merged ids, labels)
 MERGE = {1960: {"ids": [1960, 1961], "labels": [("صغير", "Small"), ("كبير", "Large")]}}
 
-NAME_FIX_AR = {1548: "شاورما لف لحمة", 1960: "بطاطا مقلية", 1586: "معجنات كشكوان ومرتديلا"}
-NAME_FIX_EN = {1548: "Beef Shawarma Wrap", 1960: "French Fries"}
+NAME_FIX_AR = {1548: "شاورما لف لحمة", 1960: "بطاطا مقلية", 1586: "معجنات كشكوان ومرتديلا", 1609: "لبن عيران 1 لتر"}
+NAME_FIX_EN = {1548: "Beef Shawarma Wrap", 1960: "French Fries", 1609: "Ayran Yogurt Drink (1 L)"}
 
 
 def webp(src_name, item_id):
