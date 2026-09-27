@@ -26,8 +26,8 @@ RESTAURANT = {
     "address_ar": "أول شارع وصفي التل، مقابل كباب النايا — عمّان",
     "address_en": "Start of Wasfi At-Tall St., opposite Kebab Al-Naya — Amman",
     "maps_url": "https://maps.app.goo.gl/n7hkCoT417FGWTZ1A",
-    "lat": 31.97356,
-    "lng": 35.89144,
+    "lat": 31.98354,
+    "lng": 35.89203,
     "plus_code": "XVMR+CH Amman",
     # Google Maps: 08:00–02:00 every day. Times are Asia/Amman.
     "hours": {"open": "08:00", "close": "02:00"},

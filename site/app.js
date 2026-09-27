@@ -545,7 +545,7 @@
     const load = () => {
       if (wrap.dataset.loaded) return; wrap.dataset.loaded = 1;
       const { lat, lng } = DATA.restaurant;
-      wrap.innerHTML = `<iframe title="Map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${lat},${lng}&z=16&hl=${lang}&output=embed"></iframe>`;
+      wrap.innerHTML = `<iframe title="Map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${encodeURIComponent("Alniran Restaurant, Wasfi At-Tall St., Amman, Jordan")}&ll=${lat},${lng}&z=17&hl=${lang}&output=embed"></iframe>`;
     };
     $("#mapLoad").onclick = load;
     if ("IntersectionObserver" in window) {
