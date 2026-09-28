@@ -833,7 +833,6 @@ function renderSettings() {
 
     <div class="page-head" style="margin-top:28px"><h2>الحساب</h2></div>
     <div class="section-box">
-      <p class="muted small" style="margin:0">لتغيير كلمة المرور: من لوحة Cloudflare ← Workers ← alneran ← Settings ← Variables and Secrets ← ADMIN_PASSWORD.</p>
       <div><button class="btn danger" id="logout">تسجيل الخروج</button></div>
     </div>`;
 

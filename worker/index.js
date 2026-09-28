@@ -55,7 +55,7 @@ async function api(request, url, env) {
 
   // Everything below is admin-only and must come from our own admin page
   if (method !== "GET" && request.headers.get("x-admin") !== "1") return fail(403, "طلب غير مسموح");
-  if (!env.ADMIN_PASSWORD) return fail(503, "لوحة التحكم غير مفعّلة بعد: أضف كلمة المرور ADMIN_PASSWORD في إعدادات Cloudflare");
+  if (!env.ADMIN_PASSWORD) return fail(503, "لوحة التحكم غير مفعّلة بعد، تواصل مع الدعم الفني");
 
   if (path === "/api/login" && method === "POST") {
     const body = await request.json().catch(() => ({}));
