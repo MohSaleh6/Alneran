@@ -1,11 +1,16 @@
-// Cloudflare Workers config: serves the static menu in ./site
+// Cloudflare Workers config: the menu site in ./site plus a small Worker for the admin API.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "alneran",
+  "main": "./worker/index.js",
   "compatibility_date": "2026-09-01",
   "assets": {
     "directory": "./site",
+    "binding": "ASSETS",
     // Unknown paths (e.g. a mistyped card link) still open the menu
-    "not_found_handling": "single-page-application"
-  }
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/media/*"]
+  },
+  // Menu data, version history and uploaded photos. Created automatically on the first deploy.
+  "kv_namespaces": [{ "binding": "STORE" }]
 }

@@ -238,7 +238,7 @@ def main():
 
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "menu.json"), "w", encoding="utf-8") as f:
-        json.dump({"restaurant": RESTAURANT, "categories": categories}, f, ensure_ascii=False, separators=(",", ":"))
+        json.dump({"restaurant": RESTAURANT, "categories": categories, "offers": []}, f, ensure_ascii=False, separators=(",", ":"))
     n = sum(len(c["items"]) for c in categories)
     print(f"site/menu.json: {len(categories)} categories, {n} items")
 

@@ -23,8 +23,8 @@
       ratingNote: "511 تقييم · الزوار يرشّحون المنسف والشاورما اللحمة",
       showMap: "عرض الخريطة", footer: "مطعم النيران — عمّان", priceNote: "جميع الأسعار بالدينار الأردني",
       viewOrder: "عرض الطلب", cur: "د.أ",
-      openNow: "مفتوح الآن", closesAt: "يغلق 2:00 ص", closingSoon: "يغلق قريباً · 2:00 ص",
-      closedNow: "مغلق الآن", opensAt: "يفتح 8:00 ص",
+      openNow: "مفتوح الآن", closesAt: "يغلق {t}", closingSoon: "يغلق قريباً · {t}", opensAt: "يفتح {t}",
+      closedNow: "مغلق الآن",
       table: "طاولة", popularBadge: "الأكثر طلباً", serves: "يكفي {n} أشخاص",
       everyDay: ["كل أحد", "كل اثنين", "كل ثلاثاء", "كل أربعاء", "كل خميس", "كل جمعة", "كل سبت"],
       availableToday: "متوفر اليوم", todayTag: "طبق اليوم 🔥",
@@ -37,6 +37,8 @@
       waHint: "سيُفتح واتساب برسالة جاهزة، فقط اضغط إرسال.",
       confirmClear: "مسح كل الأصناف من الطلب؟", langBtn: "EN", langLabel: "English",
       mapLoading: "جاري تحميل الخريطة…", items: "صنف",
+      offers: "العروض", soldout: "نفذت الكمية", off: "خصم {n}%", sale: "عرض خاص", until: "حتى {d}",
+      daily: "يومياً من {a} حتى {b}", am: "ص", pm: "م", from: "من", offerTag: "عرض",
     },
     en: {
       brand: "Alneran", tagline: "The finest Levantine meals & mezze, in every form",
@@ -49,8 +51,8 @@
       ratingNote: "511 reviews · guests recommend the mansaf and beef shawarma",
       showMap: "Show map", footer: "Alneran Restaurant — Amman", priceNote: "All prices in Jordanian dinars",
       viewOrder: "View order", cur: "JD",
-      openNow: "Open now", closesAt: "Closes 2:00 AM", closingSoon: "Closing soon · 2:00 AM",
-      closedNow: "Closed now", opensAt: "Opens 8:00 AM",
+      openNow: "Open now", closesAt: "Closes {t}", closingSoon: "Closing soon · {t}", opensAt: "Opens {t}",
+      closedNow: "Closed now",
       table: "Table", popularBadge: "Most loved", serves: "Serves {n}",
       everyDay: ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"],
       availableToday: "Available today", todayTag: "Today's special 🔥",
@@ -63,6 +65,8 @@
       waHint: "WhatsApp opens with the message ready — just tap send.",
       confirmClear: "Remove everything from your order?", langBtn: "عربي", langLabel: "العربية",
       mapLoading: "Loading map…", items: "items",
+      offers: "Offers", soldout: "Sold out", off: "{n}% off", sale: "Special price", until: "until {d}",
+      daily: "Daily {a} – {b}", am: "AM", pm: "PM", from: "from", offerTag: "Offer",
     },
   };
   let lang = store.get("alneran-lang", "ar") === "en" ? "en" : "ar";
@@ -161,17 +165,25 @@
     const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
     return { day, mins: +get("hour") * 60 + +get("minute") };
   }
+  const toMins = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+  function fmtTime(hhmm) {
+    const [h, m] = hhmm.split(":").map(Number);
+    return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? t("am") : t("pm")}`;
+  }
   function openState() {
     const { mins } = ammanNow();
-    const open = mins >= 8 * 60 || mins < 2 * 60;
-    const soon = open && mins < 2 * 60 && mins >= 60;
-    return { open, soon };
+    const o = toMins(DATA.restaurant.hours.open), c = toMins(DATA.restaurant.hours.close);
+    if (o === c) return { open: true, soon: false, always: true };
+    const open = c > o ? mins >= o && mins < c : mins >= o || mins < c;
+    const left = (c - mins + 1440) % 1440;
+    return { open, soon: open && left <= 60 };
   }
   function renderStatus() {
-    const s = openState();
+    if (!DATA) return;
+    const s = openState(), H = DATA.restaurant.hours;
     const el = $("#openStatus");
     el.classList.toggle("closed", !s.open);
-    const txt = s.open ? `${t("openNow")} · ${s.soon ? t("closingSoon") : t("closesAt")}` : `${t("closedNow")} · ${t("opensAt")}`;
+    const txt = s.always ? t("openNow") : s.open ? `${t("openNow")} · ${(s.soon ? t("closingSoon") : t("closesAt")).replace("{t}", fmtTime(H.close))}` : `${t("closedNow")} · ${t("opensAt").replace("{t}", fmtTime(H.open))}`;
     $("span", el).textContent = txt;
     $("#openStatus2").textContent = txt;
   }
@@ -190,17 +202,29 @@
   } catch { /* storage blocked */ }
 
   const lineKey = (id, opt, note) => `${id}|${opt ?? ""}|${note || ""}`;
-  const unitPrice = (item, opt) => (item.choice && opt != null ? item.choice.options[opt].price : item.price);
+  // Dates are compared in Amman time (YYYY-MM-DD); missing start/end means open-ended
+  const ammanToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Amman", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const inRange = (o) => { const d = ammanToday(); return !!o && (!o.start || o.start <= d) && (!o.end || o.end >= d); };
+  const saleOn = (item) => !!item.discount && inRange(item.discount);
+  const applyDiscount = (item, price) => {
+    if (!saleOn(item)) return price;
+    const d = item.discount, p = d.type === "percent" ? price * (1 - d.value / 100) : d.value;
+    return Math.max(0, Math.round(p * 100) / 100);
+  };
+  const basePrice = (item, opt) => (item.choice && opt != null ? item.choice.options[opt].price : item.price);
+  const unitPrice = (item, opt) => applyDiscount(item, basePrice(item, opt));
+  const canOrder = (item) => !!item && !item.soldout && !item.hidden;
   const cartQty = (id) => cart.filter((l) => l.id === id).reduce((a, l) => a + l.qty, 0);
   const cartCount = () => cart.reduce((a, l) => a + l.qty, 0);
   const cartTotal = () => cart.reduce((a, l) => { const it = byId.get(l.id); return it ? a + unitPrice(it, l.opt) * l.qty : a; }, 0);
   function saveCart() {
-    cart = cart.filter((l) => l.qty > 0 && byId.has(l.id));
+    cart = cart.filter((l) => l.qty > 0 && canOrder(byId.get(l.id)) && (l.opt == null || byId.get(l.id).choice?.options[l.opt]));
     store.set("alneran-cart", cart);
     renderCartBar();
     $$(".add-btn[data-id]").forEach((b) => paintAddBtn(b, +b.dataset.id));
   }
   function addToCart(id, opt = null, qty = 1, note = "") {
+    if (!canOrder(byId.get(id))) return;
     const k = lineKey(id, opt, note);
     const l = cart.find((x) => lineKey(x.id, x.opt, x.note) === k);
     if (l) l.qty += qty; else cart.push({ id, opt, qty, note });
@@ -210,19 +234,35 @@
   /* ---------------- Rendering ---------------- */
   function thumb(item, cls = "") {
     if (item.img) {
-      return `<div class="thumb ${cls}"><img src="/${item.img}" alt="" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
+      return `<div class="thumb ${cls}"><img src="${item.img.startsWith("/") ? item.img : "/" + item.img}" alt="" loading="lazy" decoding="async" onload="this.classList.add('loaded')"></div>`;
     }
     return `<div class="thumb ph ${cls}">${phLogo}</div>`;
   }
   function badges(item, today) {
     const b = [];
+    if (item.soldout) b.push(`<span class="badge out">${t("soldout")}</span>`);
+    if (saleOn(item)) {
+      const d = item.discount;
+      b.push(`<span class="badge sale">${d.type === "percent" ? t("off").replace("{n}", d.value) : t("sale")}${d.end ? ` · ${t("until").replace("{d}", shortDate(d.end))}` : ""}</span>`);
+    }
     if (item.popular) b.push(`<span class="badge hot">${t("popularBadge")}</span>`);
     if (item.day != null) b.push(item.day === today ? `<span class="badge today">${t("availableToday")}</span>` : `<span class="badge">${t("everyDay")[item.day]}</span>`);
     if (item.serves) b.push(`<span class="badge">${t("serves").replace("{n}", item.serves)}</span>`);
     return b.length ? `<div class="badges">${b.join("")}</div>` : "";
   }
+  const shortDate = (iso) => { const [, m, d] = iso.split("-").map(Number); return `${d}/${m}`; };
+  // Price with the original struck through when a discount is running
+  function priceHTML(item) {
+    const from = item.choice ? `<small>${t("from")}</small> ` : "";
+    const base = item.choice ? Math.min(...item.choice.options.map((o) => o.price)) : item.price;
+    const now = applyDiscount(item, base);
+    const was = now < base ? base : item.old_price && item.old_price > now ? item.old_price : null;
+    return `<span class="price">${from}${money(now)}</span>${was ? `<s class="was">${was.toFixed(2)}</s>` : ""}`;
+  }
   const plusIco = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
   function paintAddBtn(btn, id) {
+    const it = byId.get(id);
+    if (!canOrder(it)) { btn.disabled = true; btn.innerHTML = plusIco; btn.setAttribute("aria-label", t("soldout")); return; }
     const q = cartQty(id);
     btn.innerHTML = q ? `<span class="qty">${q}</span>` : plusIco;
     btn.setAttribute("aria-label", `${t("add")} — ${nm(byId.get(id))}`);
@@ -237,40 +277,58 @@
     $$("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
     $$("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
     const lb = $("#langBtn"); lb.textContent = t("langBtn"); lb.setAttribute("aria-label", t("langLabel"));
-    $("#addressText").textContent = lang === "ar" ? DATA.restaurant.address_ar : DATA.restaurant.address_en;
+    const R = DATA.restaurant;
+    $("#addressText").textContent = (lang === "ar" ? R.address_ar : R.address_en) || R.address_ar || "";
+    $(".hero-tagline").textContent = (lang === "ar" ? R.tagline_ar : R.tagline_en) || t("tagline");
+    $("#hoursText").textContent = R.hours.open === R.hours.close ? (lang === "ar" ? "مفتوح 24 ساعة" : "Open 24 hours") : t("daily").replace("{a}", fmtTime(R.hours.open)).replace("{b}", fmtTime(R.hours.close));
+    const tel = `tel:${R.phone.replace(/[^+0-9]/g, "")}`;
+    $("#callBtn").href = tel; $("#phoneLink").href = tel;
+    $("#phoneLink").textContent = localPhone(R.phone);
+    if (R.maps_url) { $("#mapBtn").href = R.maps_url; $("#mapLink").href = R.maps_url; }
     $(".hero-logo").setAttribute("aria-label", lang === "ar" ? "شعار مطعم النيران" : "Alneran logo");
     const tc = $("#tableChip");
     tc.hidden = !table; tc.textContent = table ? `${t("table")} ${table}` : "";
     renderStatus();
 
+    const cats = visibleCats();
+    const all = cats.flatMap((c) => c.items);
+
+    // Offers
+    const offers = activeOffers();
+    const os = $("#cat-offers");
+    os.hidden = !offers.length;
+    $("#offersRail").innerHTML = offers.map((o) => `<button class="offer-card" data-open="${o.id}">${o.img ? thumb(o) : ""}<div class="body"><span class="badge hot">${t("offerTag")}</span><h3>${esc(nm(o))}</h3>${ds(o) ? `<p>${esc(ds(o))}</p>` : ""}<div class="offer-foot"><span class="price-wrap">${priceHTML(o)}</span>${o.end ? `<small class="muted">${t("until").replace("{d}", shortDate(o.end))}</small>` : ""}</div></div></button>`).join("");
+
     // Today's special
-    const todays = DATA.categories.flatMap((c) => c.items).filter((i) => i.day === day);
+    const todays = all.filter((i) => i.day === day && !i.soldout);
     const td = $("#today");
     td.hidden = !todays.length;
-    td.innerHTML = todays.map((i) => `<button class="today-card" data-open="${i.id}">${thumb(i)}<div><div class="tag">${t("todayTag")}</div><h3>${esc(nm(i))}</h3><div class="price">${money(i.price)}</div></div></button>`).join("");
+    td.innerHTML = todays.map((i) => `<button class="today-card" data-open="${i.id}">${thumb(i)}<div><div class="tag">${t("todayTag")}</div><h3>${esc(nm(i))}</h3><div class="price-wrap">${priceHTML(i)}</div></div></button>`).join("");
 
     // Popular rail (photos first)
-    const pop = DATA.categories.flatMap((c) => c.items).filter((i) => i.popular).sort((a, b) => !!b.img - !!a.img);
-    $("#popular").innerHTML = pop.map((i) => `<button class="pop-card" data-open="${i.id}"><div class="media">${thumb(i)}</div><div class="body"><h3>${esc(nm(i))}</h3><div class="price">${money(i.price)}</div></div></button>`).join("");
+    const pop = all.filter((i) => i.popular && !i.soldout).sort((a, b) => !!b.img - !!a.img);
+    $("#popularWrap").hidden = !pop.length;
+    $("#popular").innerHTML = pop.map((i) => `<button class="pop-card" data-open="${i.id}"><div class="media">${thumb(i)}</div><div class="body"><h3>${esc(nm(i))}</h3><div class="price-wrap">${priceHTML(i)}</div></div></button>`).join("");
 
     // Category nav
     const track = $("#catnavTrack");
     track.innerHTML = `<span class="catnav-origin" style="position:absolute;left:0;top:0;width:0;height:0"></span><span class="catnav-ink" id="catnavInk"></span>` +
-      DATA.categories.map((c) => `<button class="cat-btn" data-cat="${c.key}">${esc(nm(c))}</button>`).join("");
+      (offers.length ? `<button class="cat-btn" data-cat="offers">${t("offers")}</button>` : "") +
+      cats.map((c) => `<button class="cat-btn" data-cat="${c.key}">${esc(nm(c))}</button>`).join("");
 
     // Sections
-    $("#menu").innerHTML = DATA.categories.map((c) => `
+    $("#menu").innerHTML = cats.map((c) => `
       <section class="menu-section" id="cat-${c.key}" data-cat="${c.key}">
         <h2 class="section-title"><span class="flame-ico" aria-hidden="true"></span><span>${esc(nm(c))}</span><span class="count">${c.items.length}</span></h2>
         <div class="items">${c.items.map((i, n) => `
-          <article class="card reveal" data-open="${i.id}" data-search="${esc(normalize([i.ar, i.en, i.desc_ar, i.desc_en, c.ar, c.en].join(" ")))}" style="transition-delay:${(n % 4) * 50}ms" tabindex="0" role="button" aria-label="${esc(nm(i))}">
+          <article class="card reveal${i.soldout ? " is-out" : ""}" data-open="${i.id}" data-search="${esc(normalize([i.ar, i.en, i.desc_ar, i.desc_en, c.ar, c.en].join(" ")))}" style="transition-delay:${(n % 4) * 50}ms" tabindex="0" role="button" aria-label="${esc(nm(i))}">
             ${thumb(i)}
             <div class="body">
               <h3>${esc(nm(i))}</h3>
               ${lang === "ar" && i.en ? `<p class="sub" lang="en" dir="ltr">${esc(i.en)}</p>` : ""}
               ${ds(i) ? `<p class="desc">${esc(ds(i))}</p>` : ""}
               ${badges(i, day)}
-              <div class="foot"><span class="price">${i.choice ? `<small>${lang === "ar" ? "من" : "from"}</small> ` : ""}${money(i.price)}</span><button class="add-btn" data-id="${i.id}"></button></div>
+              <div class="foot"><span class="price-wrap">${priceHTML(i)}</span><button class="add-btn" data-id="${i.id}"></button></div>
             </div>
           </article>`).join("")}
         </div>
@@ -280,6 +338,17 @@
     observeSections();
     renderCartBar();
     if ($("#searchInput").value) applySearch();
+  }
+
+  const visibleCats = () => DATA.categories
+    .filter((c) => !c.hidden)
+    .map((c) => ({ ...c, items: c.items.filter((i) => !i.hidden) }))
+    .filter((c) => c.items.length);
+  const activeOffers = () => (DATA.offers || []).filter((o) => o.active !== false && !o.hidden && inRange(o));
+  function localPhone(p) {
+    const d = p.replace(/[^0-9]/g, "");
+    const n = d.startsWith("962") ? "0" + d.slice(3) : d;
+    return n.length === 10 ? `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}` : p;
   }
 
   /* ---------------- Reveal on scroll ---------------- */
@@ -322,8 +391,12 @@
       if (best && best !== activeCat) setActive(best);
     }, { rootMargin: "-130px 0px -55% 0px" });
     $$(".menu-section").forEach((s) => secIO.observe(s));
-    const info = $("#info"); info.dataset.cat = DATA.categories.at(-1).key; secIO.observe(info);
-    requestAnimationFrame(() => setActive(activeCat || DATA.categories[0].key, false));
+    const os = $("#cat-offers"); if (!os.hidden) secIO.observe(os);
+    const cats = visibleCats();
+    if (!cats.length) return;
+    const info = $("#info"); info.dataset.cat = cats.at(-1).key; secIO.observe(info);
+    const first = !os.hidden ? "offers" : cats[0].key;
+    requestAnimationFrame(() => setActive($(`.cat-btn[data-cat="${activeCat}"]`) ? activeCat : first, false));
   }
 
   /* ---------------- Search ---------------- */
@@ -416,19 +489,20 @@
         ${ds(it) ? `<p class="desc">${esc(ds(it))}</p>` : ""}
         <div class="meta">${badges(it, day).replace(/^<div class="badges">|<\/div>$/g, "")}</div>
         ${it.choice ? `<div class="opt-group"><h4>${esc(nm(it.choice))}</h4><div class="opts">${it.choice.options.map((o, n) => `
-          <label class="opt"><input type="radio" name="opt" value="${n}" ${n === 0 ? "checked" : ""}><span class="grow">${esc(nm(o))}</span><span class="p">${o.price.toFixed(2)}</span></label>`).join("")}</div></div>` : ""}
+          <label class="opt"><input type="radio" name="opt" value="${n}" ${n === 0 ? "checked" : ""}><span class="grow">${esc(nm(o))}</span>${saleOn(it) ? `<s class="was">${o.price.toFixed(2)}</s>` : ""}<span class="p">${applyDiscount(it, o.price).toFixed(2)}</span></label>`).join("")}</div></div>` : ""}
         <textarea class="note" rows="1" maxlength="120" placeholder="${t("note")}"></textarea>
       </div>
       <div class="sheet-actions">
         <div class="stepper"><button data-q="-1" aria-label="−">−</button><span class="q">1</span><button data-q="1" aria-label="+">+</button></div>
-        <button class="primary add-go"><span>${t("add")}</span><span class="price"></span></button>
+        ${canOrder(it) ? `<button class="primary add-go"><span>${t("add")}</span><span class="price"></span></button>` : `<button class="primary add-go" disabled>${t("soldout")}</button>`}
       </div>`;
-    const upd = () => { $(".q", el).textContent = qty; $(".add-go .price", el).innerHTML = money(unitPrice(it, opt) * qty); };
+    const upd = () => { $(".q", el).textContent = qty; const pe = $(".add-go .price", el); if (pe) pe.innerHTML = money(unitPrice(it, opt) * qty); };
     upd();
     $(".close", el).onclick = () => hideSheet(el);
     $$("input[name=opt]", el).forEach((r) => (r.onchange = () => { opt = +r.value; upd(); }));
     $$(".stepper button", el).forEach((b) => (b.onclick = () => { qty = Math.max(1, Math.min(50, qty + +b.dataset.q)); upd(); }));
     $(".add-go", el).onclick = (e) => {
+      if (!canOrder(it)) return;
       addToCart(id, opt, qty, $(".note", el).value.trim());
       flyFrom(e.currentTarget);
       toast(t("added"));
@@ -523,7 +597,7 @@
     cart.forEach((l) => {
       const it = byId.get(l.id); if (!it) return;
       const o = it.choice && l.opt != null ? ` (${it.choice.options[l.opt].ar})` : "";
-      L.push(`${l.qty} × ${it.ar}${o} — ${(unitPrice(it, l.opt) * l.qty).toFixed(2)}`);
+      L.push(`${l.qty} × ${it.isOffer ? "🎁 عرض: " : ""}${it.ar}${o} — ${(unitPrice(it, l.opt) * l.qty).toFixed(2)}${saleOn(it) ? " (بعد الخصم)" : ""}`);
       if (l.note) L.push(`   📝 ${l.note}`);
     });
     L.push("━━━━━━━━━━");
@@ -561,6 +635,7 @@
       if (add) {
         e.stopPropagation();
         const id = +add.dataset.id, it = byId.get(id);
+        if (!canOrder(it)) return;
         if (it.choice) { openItem(id); return; }
         addToCart(id); flyFrom(add); toast(t("added"));
         return;
@@ -597,10 +672,14 @@
   mountLogos();
   embers();
   $("#year").textContent = new Date().getFullYear();
-  fetch("/menu.json").then((r) => r.json()).then((d) => {
+  const getJSON = (u) => fetch(u, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  getJSON("/api/menu").catch(() => getJSON("/api/menu")).catch(() => getJSON("/menu.json")).then((d) => {
     DATA = d;
-    d.categories.forEach((c) => c.items.forEach((i) => byId.set(i.id, i)));
-    cart = cart.filter((l) => byId.has(l.id));
+    d.offers = d.offers || [];
+    // anything in a hidden category, or an offer that isn't running today, can't be ordered
+    d.categories.forEach((c) => c.items.forEach((i) => { if (c.hidden) i.hidden = true; byId.set(i.id, i); }));
+    d.offers.forEach((o) => { o.isOffer = true; if (!(o.active !== false && inRange(o))) o.hidden = true; byId.set(o.id, o); });
+    saveCart();
     render(); bind(); lazyMap();
   }).catch(() => { $("#menu").innerHTML = `<p class="no-results">تعذّر تحميل المنيو — حاول مجدداً<br>Couldn't load the menu — please retry</p>`; });
 })();

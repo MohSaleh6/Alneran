@@ -25,17 +25,42 @@ https://<your-site>/?t=2
 …
 ```
 
-## Updating the menu
+## Admin panel (لوحة التحكم)
 
-Edit [`site/menu.json`](site/menu.json). It holds the prices, names, descriptions, categories, `popular`, `day` (0 = Sunday … 6 = Saturday) and `choice` options. Commit the change and Cloudflare redeploys automatically.
+Open **`/admin`**, for example `https://alneran.mohalisal1.workers.dev/admin`, and log in with the admin password. Staff can:
 
-To rebuild it from the source data instead, run `python3 scripts/build_site.py`. It needs Pillow, and it overwrites `site/menu.json`. The curated text lives in that script.
+- **الأصناف (dishes):**
+  - Add, edit and delete dishes: names, descriptions, price, category and photo. Photos are uploaded from the phone and shrunk automatically.
+  - Sizes and other options, each with its own price.
+  - Mark a dish sold out (نفذت الكمية) with one switch.
+  - Hide a dish, feature it in "most loved", set the day it's served, and reorder dishes.
+- **العروض (offers and discounts):**
+  - Special offers with a price, an optional old price, and optional start/end dates. Offers appear at the top of the menu and can be ordered.
+  - Discounts (a percentage or a new price) on one dish, several dishes, or a whole category, with optional dates. Customers see the old price struck through.
+- **الأقسام (categories):** add, rename, reorder, hide and delete categories. When deleting a category, its dishes can be moved to another category.
+- **الإعدادات (settings):**
+  - Restaurant details: phone, WhatsApp, opening hours, address and tagline.
+  - **History:** every save keeps the previous version for 90 days, and any version can be restored in one tap.
+  - Download or restore a backup file.
 
-A new photo goes in `site/img/` as `<item id>.webp`. Then set `"img": "img/<id>.webp"` on that item.
+Every change is checked before it's published, both in the page and again on the server, so bad data can't break the menu. Changes appear on the customer menu within about a minute. If two people edit at once, the second save is refused and the latest menu is reloaded instead of being overwritten.
+
+### How it works
+
+- [`worker/index.js`](worker/index.js) handles `/api/*` and `/media/*`. Everything else is served straight from [`site/`](site).
+- The live menu, the version history and the uploaded photos are stored in a Workers KV namespace (binding `STORE`), which Cloudflare creates on the first deploy.
+- Until the first save, the Worker serves the bundled [`site/menu.json`](site/menu.json). The customer menu also falls back to that file if the API can't be reached.
+- The validation rules are in [`site/admin/validate.js`](site/admin/validate.js), shared by the browser and the Worker.
+
+### One-time setup: the admin password
+
+In the Cloudflare dashboard, go to **Workers & Pages → alneran → Settings → Variables and Secrets → Add**. Choose type **Secret**, name it `ADMIN_PASSWORD`, set a strong value, and save. Until it is set, `/admin` shows "not enabled". Changing the password logs out every device.
+
+For local testing, put `ADMIN_PASSWORD=...` in `.dev.vars` (this file is git-ignored) and run `npx wrangler dev`.
 
 ## Deploying to Cloudflare
 
-This is a one-time setup in the Cloudflare dashboard, and after it every push deploys automatically:
+The site is connected to this GitHub repository, so every push deploys automatically. The original setup was:
 
 1. Go to **Workers & Pages → Create → Import a repository** and pick this GitHub repo and branch.
 2. Leave the build command empty. The deploy command is `npx wrangler deploy`, which is the default and reads [`wrangler.jsonc`](wrangler.jsonc).

@@ -12,3 +12,7 @@
 
 /menu.json
   Cache-Control: public, max-age=0, must-revalidate
+
+/admin/*
+  Cache-Control: no-cache
+  X-Robots-Tag: noindex, nofollow
