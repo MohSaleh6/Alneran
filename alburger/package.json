@@ -1,0 +1,15 @@
+{
+  "name": "alburger",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "placeholders": "node scripts/make_placeholders.mjs",
+    "images": "python3 scripts/build_images.py",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.55.0",
+    "wrangler": "^4.40.0"
+  }
+}

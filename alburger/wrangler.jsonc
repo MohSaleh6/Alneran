@@ -1,0 +1,12 @@
+// Cloudflare Workers config for the ĀL BURGER site: static assets only, no Worker code.
+// Deploys to https://alburger.<your-subdomain>.workers.dev (here: alburger.mohalisal1.workers.dev).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "alburger",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./site",
+    "not_found_handling": "404-page"
+  }
+}
