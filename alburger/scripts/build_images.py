@@ -54,7 +54,7 @@ def remove_background(img):
     except ImportError:
         sys.exit("This photo has no transparency. Install rembg to cut it out:  pip install \"rembg[cpu]\"")
     if _session is None:
-        _session = new_session(os.environ.get("REMBG_MODEL", "u2net"))
+        _session = new_session(os.environ.get("REMBG_MODEL", "isnet-general-use"))
     buf = io.BytesIO()
     img.convert("RGB").save(buf, "PNG")
     return Image.open(io.BytesIO(remove(buf.getvalue(), session=_session, post_process_mask=True))).convert("RGBA")
