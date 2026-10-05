@@ -7,8 +7,9 @@ These are printable table cards in the restaurant's fire colours, with the logo,
 
 | File | What |
 |---|---|
-| `print/alneran-cards-all.pdf` | Everything, one per page: page 1 general card (7×13), pages 2–6 tables 1–5 (7×13), pages 7–8 tables 6–7 (17×17) |
+| `print/alneran-cards-all.pdf` | Everything, one per page: page 1 general card (7×13), page 2 general sheet (17×17), pages 3–7 tables 1–5 (7×13), pages 8–9 tables 6–7 (17×17) |
 | `print/pdf/table-06-17x17.pdf`, `table-07-17x17.pdf` | The two large-stand sheets on their own |
+| `print/png/general-17x17.png`, `print/pdf/general-17x17.pdf` | A 17 × 17 cm general sheet (no table number) |
 | `print/pdf/general.pdf`, `print/png/general.png` | The general card, which links to the menu with no table number |
 
 - **Size:** the 7 × 13 cm pages are 76 × 136 mm. That is the 70 × 130 mm card plus 3 mm bleed on every side, so tell the printer *"trim to 70 × 130 mm, 3 mm bleed"*. All the text sits at least 4 mm inside the cut. The 17 × 17 cm pages are 176 × 176 mm, with the same 3 mm bleed.

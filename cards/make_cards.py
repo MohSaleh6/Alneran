@@ -163,7 +163,7 @@ def main():
         MASKS[u] = int(m)
     tables = int(sys.argv[1]) if len(sys.argv) > 1 else 7
     os.makedirs(BUILD, exist_ok=True)
-    cards = [("general", BASE, None, "std")] + [
+    cards = [("general", BASE, None, "std"), ("general-17x17", BASE, None, "big")] + [
         (f"table-{n:02d}" + ("-17x17" if n in BIG_TABLES else ""), f"{BASE}?t={n}", n, "big" if n in BIG_TABLES else "std")
         for n in range(1, tables + 1)]
     with open(os.path.join(BUILD, "cards.tsv"), "w") as f:
