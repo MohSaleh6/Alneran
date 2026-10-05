@@ -3,11 +3,11 @@
 These are printable table cards in the restaurant's fire colours, with the logo, a QR code and a "tap your phone" NFC area. The restaurant has **7 tables**:
 
 - **Tables 1–5 (small stands):** a 7 × 13 cm card.
-- **Tables 6–7 (large stands):** a 17 × 17 cm sheet with the same 7 × 13 cm design in the centre and the fire background filling the whole sheet. Cut it down to the stand's size.
+- **Tables 6–7 (large stands):** a 7 × 13 cm card as well as a 17 × 17 cm sheet with the same 7 × 13 cm design in the centre and the fire background filling the whole sheet. Cut it down to the stand's size.
 
 | File | What |
 |---|---|
-| `print/alneran-cards-all.pdf` | Everything, one per page: page 1 general card (7×13), page 2 general sheet (17×17), pages 3–7 tables 1–5 (7×13), pages 8–9 tables 6–7 (17×17) |
+| `print/alneran-cards-all.pdf` | Everything, one per page: page 1 general card (7×13), page 2 general sheet (17×17), pages 3–9 tables 1–7 (7×13), pages 10–11 tables 6–7 (17×17) |
 | `print/pdf/table-06-17x17.pdf`, `table-07-17x17.pdf` | The two large-stand sheets on their own |
 | `print/png/general-17x17.png`, `print/pdf/general-17x17.pdf` | A 17 × 17 cm general sheet (no table number) |
 | `print/pdf/general.pdf`, `print/png/general.png` | The general card, which links to the menu with no table number |

@@ -165,7 +165,9 @@ def main():
     os.makedirs(BUILD, exist_ok=True)
     cards = [("general", BASE, None, "std"), ("general-17x17", BASE, None, "big")] + [
         (f"table-{n:02d}" + ("-17x17" if n in BIG_TABLES else ""), f"{BASE}?t={n}", n, "big" if n in BIG_TABLES else "std")
-        for n in range(1, tables + 1)]
+        for n in range(1, tables + 1)] + [
+        # the large-stand tables also get a 7 x 13 cm card
+        (f"table-{n:02d}", f"{BASE}?t={n}", n, "std") for n in sorted(BIG_TABLES) if n <= tables]
     with open(os.path.join(BUILD, "cards.tsv"), "w") as f:
         for name, url, table, size in cards:
             with open(os.path.join(BUILD, f"{name}.html"), "w", encoding="utf-8") as h:
