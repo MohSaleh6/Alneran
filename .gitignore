@@ -3,5 +3,5 @@ node_modules/
 .DS_Store
 .dev.vars
 cards/build/
-cards/print/pdf/table-*.pdf
-cards/print/png/table-*.png
+cards/print/pdf/table-0[1-5].pdf
+cards/print/png/table-0[1-5].png

@@ -5,7 +5,7 @@ Writes one HTML page per card into cards/build/, which cards/render.js turns int
   general  -> the menu link without a table number (works on any table)
   table-N  -> ?t=N, so the WhatsApp order already carries the table number
 
-Usage: python3 cards/make_cards.py [number_of_tables]   (default 20; needs the `qrcode` package)
+Usage: python3 cards/make_cards.py [number_of_tables]   (default 7; needs the `qrcode` package)
 """
 import io
 import os
@@ -18,13 +18,23 @@ BASE = "https://alneran.mohalisal1.workers.dev/"
 HERE = os.path.dirname(os.path.abspath(__file__))
 BUILD = os.path.join(HERE, "build")
 
-# Physical size in mm: trim 70 x 130, plus 3 mm bleed on every side
+# Physical size in mm. The design is always 70 x 130 mm (plus 3 mm bleed).
+#   std: a 7 x 13 cm card
+#   big: a 17 x 17 cm sheet for the larger stands, with the same design centred on a full fire
+#        background, so it can be cut to the stand's size
 TRIM_W, TRIM_H, BLEED = 70, 130, 3
-PAGE_W, PAGE_H = TRIM_W + 2 * BLEED, TRIM_H + 2 * BLEED
+DES_W, DES_H = TRIM_W + 2 * BLEED, TRIM_H + 2 * BLEED
+SIZES = {"std": (DES_W, DES_H), "big": (170 + 2 * BLEED, 170 + 2 * BLEED)}
+# Tables on the larger stands
+BIG_TABLES = {6, 7}
+
+
+# Mask pattern per link, chosen so the code scans cleanly over the fire background (see README)
+MASKS = {BASE: 1, BASE + "?t=1": 0, BASE + "?t=2": 0, BASE + "?t=3": 0, BASE + "?t=4": 4, BASE + "?t=5": 4, BASE + "?t=6": 6, BASE + "?t=7": 1}
 
 
 def qr_svg(url):
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_Q, border=0, box_size=10)
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_Q, border=0, box_size=10, mask_pattern=MASKS.get(url))
     qr.add_data(url)
     qr.make(fit=True)
     img = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
@@ -40,7 +50,9 @@ def qr_svg(url):
 NFC_ICON = """<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="13" y="6" width="20" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="2.6"/><line x1="20" y1="37" x2="26" y2="37" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M37 17a9 9 0 0 1 0 14M41 13a15 15 0 0 1 0 22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>"""
 
 
-def card_html(url, table=None):
+def card_html(url, table=None, size="std"):
+    PAGE_W, PAGE_H = SIZES[size]
+    ox, oy = (PAGE_W - DES_W) / 2, (PAGE_H - DES_H) / 2
     badge = f'<div class="c table">طاولة {table} <span>Table {table}</span></div>' if table else ""
     return f"""<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <style>
@@ -57,14 +69,15 @@ body {{ position: relative; overflow: hidden; background: #130705; color: #fcefe
   -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
 .bg {{ position: absolute; inset: 0; background: url(../background.jpg) center bottom / cover no-repeat; }}
 .shade {{ position: absolute; inset: 0; background:
-  radial-gradient(60% 26% at 50% 20%, rgba(255,120,30,.28), transparent 70%),
+  radial-gradient({60 * DES_W / PAGE_W:.1f}% {26 * DES_H / PAGE_H:.1f}% at 50% {(oy + 0.2 * DES_H) / PAGE_H * 100:.1f}%, rgba(255,120,30,.28), transparent 70%),
   linear-gradient(180deg, rgba(19,7,5,.55) 0%, rgba(19,7,5,.2) 50%, rgba(19,7,5,0) 70%); }}
+.design {{ position: absolute; left: {ox}mm; top: {oy}mm; width: {DES_W}mm; height: {DES_H}mm; }}
 .c {{ position: absolute; left: 50%; transform: translateX(-50%); text-align: center; }}
 .logo {{ top: 10mm; width: 23mm; filter: drop-shadow(0 0 2.2mm rgba(255,130,20,.55)); }}
 .latin {{ top: 48.6mm; font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-size: 3.1mm; letter-spacing: .9mm;
   padding-inline-start: .9mm; color: #ffc72e; white-space: nowrap; }}
 .tile {{ top: 54.5mm; width: 38.5mm; height: 38.5mm; padding: 3.8mm; background: #fff; border-radius: 3.4mm;
-  box-shadow: 0 0 0 .55mm #ffc72e, 0 0 4mm 1mm rgba(255,140,30,.45); }}
+  box-shadow: 0 0 0 .55mm #ffc72e, 0 0 3mm 1mm rgba(255,140,30,.4), 0 0 5mm 4.5mm rgba(19,7,5,.8); }}
 .tile svg {{ width: 100%; height: 100%; display: block; }}
 .scan {{ top: 95.3mm; white-space: nowrap; }}
 .scan b {{ display: block; font-family: Baloo, Tajawal, sans-serif; font-weight: 600; font-size: 4.6mm; line-height: 1.15; color: #fff;
@@ -81,24 +94,32 @@ body {{ position: relative; overflow: hidden; background: #130705; color: #fcefe
 .table span {{ font-weight: 500; font-size: 2.5mm; margin-inline-start: 1mm; }}
 </style></head><body>
 <div class="bg"></div><div class="shade"></div>
+<div class="design">
 <img class="c logo" src="../../site/img/logo.webp" alt="">
 <div class="c latin">ALNERAN</div>
 <div class="c tile">{qr_svg(url)}</div>
 <div class="c scan"><b>امسح الرمز لعرض المنيو</b><small>Scan to view the menu</small></div>
 <div class="c nfc">{NFC_ICON}<div><b>أو قرّب هاتفك من البطاقة</b><small>or tap your phone on the card</small></div></div>
 {badge}
+</div>
 </body></html>"""
 
 
 def main():
-    tables = int(sys.argv[1]) if len(sys.argv) > 1 else 20
+    if os.environ.get("QR_MASK"):  # testing: QR_MASK=<url>=<0..7>
+        u, m = os.environ["QR_MASK"].rsplit("=", 1)
+        MASKS[u] = int(m)
+    tables = int(sys.argv[1]) if len(sys.argv) > 1 else 7
     os.makedirs(BUILD, exist_ok=True)
-    cards = [("general", BASE, None)] + [(f"table-{n:02d}", f"{BASE}?t={n}", n) for n in range(1, tables + 1)]
+    cards = [("general", BASE, None, "std")] + [
+        (f"table-{n:02d}" + ("-17x17" if n in BIG_TABLES else ""), f"{BASE}?t={n}", n, "big" if n in BIG_TABLES else "std")
+        for n in range(1, tables + 1)]
     with open(os.path.join(BUILD, "cards.tsv"), "w") as f:
-        for name, url, table in cards:
+        for name, url, table, size in cards:
             with open(os.path.join(BUILD, f"{name}.html"), "w", encoding="utf-8") as h:
-                h.write(card_html(url, table))
-            f.write(f"{name}\t{url}\n")
+                h.write(card_html(url, table, size))
+            w, hh = SIZES[size]
+            f.write(f"{name}\t{url}\t{w}\t{hh}\n")
     print(f"{len(cards)} cards -> {BUILD}")
 
 
