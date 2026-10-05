@@ -17,7 +17,7 @@ const MM = 96 / 25.4, DPI = 300;
     const page = await b.newPage({ viewport: { width: Math.round(W * MM), height: Math.round(H * MM) }, deviceScaleFactor: DPI / 96 });
     await page.goto(`http://127.0.0.1:8799/cards/build/${name}.html`, { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
-    await page.pdf({ path: path.join(OUT, "pdf", `${name}.pdf`), width: `${W}mm`, height: `${H}mm`, printBackground: true, pageRanges: "1" });
+    await page.pdf({ path: path.join(OUT, "pdf", `${name}.pdf`), width: `${W}mm`, height: `${H}mm`, printBackground: true, pageRanges: "1", preferCSSPageSize: true });
     await page.screenshot({ path: path.join(OUT, "png", `${name}.png`) });
     await page.close();
     process.stdout.write(".");
