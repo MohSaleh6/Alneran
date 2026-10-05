@@ -30,7 +30,7 @@ BIG_TABLES = {6, 7}
 
 
 # Mask pattern per link, chosen so the code scans cleanly over the fire background (see README)
-MASKS = {BASE: 1, BASE + "?t=1": 0, BASE + "?t=2": 0, BASE + "?t=3": 0, BASE + "?t=4": 4, BASE + "?t=5": 4, BASE + "?t=6": 6, BASE + "?t=7": 1}
+MASKS = {BASE: 0, BASE + "?t=1": 0, BASE + "?t=2": 0, BASE + "?t=3": 0, BASE + "?t=4": 4, BASE + "?t=5": 4, BASE + "?t=6": 6, BASE + "?t=7": 1}
 
 
 def qr_svg(url):
@@ -73,15 +73,16 @@ body {{ position: relative; overflow: hidden; background: #130705; color: #fcefe
   linear-gradient(180deg, rgba(19,7,5,.55) 0%, rgba(19,7,5,.2) 50%, rgba(19,7,5,0) 70%); }}
 .design {{ position: absolute; left: {ox}mm; top: {oy}mm; width: {DES_W}mm; height: {DES_H}mm; }}
 .c {{ position: absolute; left: 50%; transform: translateX(-50%); text-align: center; }}
-.logo {{ top: 10mm; width: 23mm; filter: drop-shadow(0 0 2.2mm rgba(255,130,20,.55)); }}
+.logo {{ top: 10mm; width: 23mm; }}
+.glow {{ top: 8mm; width: 44mm; height: 44mm; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,140,30,.42), rgba(255,110,20,.16) 55%, rgba(255,110,20,0)); }}
 .latin {{ top: 48.6mm; font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-size: 3.1mm; letter-spacing: .9mm;
   padding-inline-start: .9mm; color: #ffc72e; white-space: nowrap; }}
 .tile {{ top: 54.5mm; width: 38.5mm; height: 38.5mm; padding: 3.8mm; background: #fff; border-radius: 3.4mm;
-  box-shadow: 0 0 0 .55mm #ffc72e, 0 0 3mm 1mm rgba(255,140,30,.4), 0 0 5mm 4.5mm rgba(19,7,5,.8); }}
+  border: .55mm solid #ffc72e; }}
 .tile svg {{ width: 100%; height: 100%; display: block; }}
 .scan {{ top: 95.3mm; white-space: nowrap; }}
-.scan b {{ display: block; font-family: Baloo, Tajawal, sans-serif; font-weight: 600; font-size: 4.6mm; line-height: 1.15; color: #fff;
-  text-shadow: 0 .3mm 1.2mm rgba(0,0,0,.6); }}
+.scan b {{ display: block; font-family: Baloo, Tajawal, sans-serif; font-weight: 600; font-size: 4.6mm; line-height: 1.15; color: #fff; }}
 .scan small {{ display: block; font-size: 2.6mm; font-weight: 500; color: #ffdcb8; letter-spacing: .1mm; }}
 .nfc {{ top: 106mm; display: flex; align-items: center; gap: 2.2mm; padding: 1.9mm 3.6mm 1.9mm 3mm; border-radius: 99mm;
   background: rgba(19,7,5,.82); border: .35mm solid rgba(255,199,46,.75); white-space: nowrap; }}
@@ -90,11 +91,12 @@ body {{ position: relative; overflow: hidden; background: #130705; color: #fcefe
 .nfc b {{ display: block; font-weight: 800; font-size: 3.2mm; line-height: 1.2; color: #fff; }}
 .nfc small {{ display: block; font-size: 2.3mm; font-weight: 500; color: #ffdcb8; }}
 .table {{ top: 119.5mm; padding: 1mm 3.4mm; border-radius: 99mm; background: linear-gradient(135deg, #ffc72e, #f57a1f 55%, #e2321f);
-  color: #2a0d04; font-weight: 800; font-size: 3.2mm; white-space: nowrap; box-shadow: 0 .4mm 1.6mm rgba(0,0,0,.4); }}
+  color: #2a0d04; font-weight: 800; font-size: 3.2mm; white-space: nowrap; }}
 .table span {{ font-weight: 500; font-size: 2.5mm; margin-inline-start: 1mm; }}
 </style></head><body>
 <div class="bg"></div><div class="shade"></div>
 <div class="design">
+<div class="c glow"></div>
 <img class="c logo" src="../../site/img/logo.webp" alt="">
 <div class="c latin">ALNERAN</div>
 <div class="c tile">{qr_svg(url)}</div>
