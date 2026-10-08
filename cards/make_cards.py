@@ -28,6 +28,8 @@ SIZES = {"std": (DES_W, DES_H), "big": (170 + 2 * BLEED, 170 + 2 * BLEED),
          # page = background size; the logo/QR/text are scaled to fit the content box and centred
          "s6": (80, 140), "s8": (100, 150)}
 CONTENT_BOX = {"s6": (60, 120), "s8": (80, 130)}
+# One QR pattern for every sticker of a size, so the stickers look identical apart from the code's data
+SIZE_MASKS = {"s6": 2}
 # Visible content of the design (logo top to the badge drips), in design mm: x, y, width, height
 CONTENT = (11, 8, 54, 120.4)
 # Tables on the larger stands
@@ -38,8 +40,8 @@ BIG_TABLES = {6, 7}
 MASKS = {BASE: 3, BASE + "?t=1": 2, BASE + "?t=2": 4, BASE + "?t=3": 2, BASE + "?t=4": 4, BASE + "?t=5": 3, BASE + "?t=6": 0, BASE + "?t=7": 0}
 
 
-def qr_svg(url):
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_Q, border=0, box_size=10, mask_pattern=MASKS.get(url))
+def qr_svg(url, mask=None):
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_Q, border=0, box_size=10, mask_pattern=mask if mask is not None else MASKS.get(url))
     qr.add_data(url)
     qr.make(fit=True)
     img = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
@@ -160,7 +162,7 @@ body {{ position: relative; overflow: hidden; background: #130705; color: #fcefe
 <div class="c glow"></div>
 <img class="c logo" src="../../site/img/logo.webp" alt="">
 <div class="c latin">ALNERAN</div>
-<div class="c tile"><div class="qr">{qr_svg(url)}</div>{TILE_DRIPS}</div>
+<div class="c tile"><div class="qr">{qr_svg(url, SIZE_MASKS.get(size))}</div>{TILE_DRIPS}</div>
 <div class="c scan"><b>امسح الرمز لعرض المنيو</b><small>Scan to view the menu</small></div>
 <div class="c nfc">{NFC_ICON}<div><b>أو قرّب هاتفك من البطاقة</b><small>or tap your phone on the card</small></div>{NFC_DRIPS}</div>
 {badge}
