@@ -17,6 +17,15 @@ These are printable table cards in the restaurant's fire colours, with the logo,
 - **NFC:** write the same link as the card's QR code onto each NFC sticker (for example with the free "NFC Tools" app → Write → URL), then stick it behind the "tap your phone" area.
 - **Background:** the fire background (`background.jpg`) was generated with Higgsfield.
 
+### Stand-size versions
+
+| File | What |
+|---|---|
+| `print/alneran-tables-1-6-6x12-on-8x14.pdf` | Tables 1–6, one per page. Each page is an 8 × 14 cm background, with the logo/QR/text scaled to fit a 6 × 12 cm area in the centre |
+| `print/alneran-table-7-8x13-on-10x15.pdf` | Table 7 on its own. The page is a 10 × 15 cm background, with the design scaled to fit an 8 × 13 cm area in the centre |
+
+The design keeps its proportions, so its height fills the box: 5.4 × 12 cm and 5.8 × 13 cm. These pages are exactly the background size, with no extra bleed.
+
 To rebuild the cards, for example with a different number of tables:
 
 ```

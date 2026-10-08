@@ -24,7 +24,12 @@ BUILD = os.path.join(HERE, "build")
 #        background, so it can be cut to the stand's size
 TRIM_W, TRIM_H, BLEED = 70, 130, 3
 DES_W, DES_H = TRIM_W + 2 * BLEED, TRIM_H + 2 * BLEED
-SIZES = {"std": (DES_W, DES_H), "big": (170 + 2 * BLEED, 170 + 2 * BLEED)}
+SIZES = {"std": (DES_W, DES_H), "big": (170 + 2 * BLEED, 170 + 2 * BLEED),
+         # page = background size; the logo/QR/text are scaled to fit the content box and centred
+         "s6": (80, 140), "s8": (100, 150)}
+CONTENT_BOX = {"s6": (60, 120), "s8": (80, 130)}
+# Visible content of the design (logo top to the badge drips), in design mm: x, y, width, height
+CONTENT = (11, 8, 54, 120.4)
 # Tables on the larger stands
 BIG_TABLES = {6, 7}
 
@@ -102,6 +107,12 @@ NFC_ICON = """<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="13" y="6" wid
 def card_html(url, table=None, size="std"):
     PAGE_W, PAGE_H = SIZES[size]
     ox, oy = (PAGE_W - DES_W) / 2, (PAGE_H - DES_H) / 2
+    k = 1
+    if size in CONTENT_BOX:
+        bw, bh = CONTENT_BOX[size]
+        cx, cy, cw, ch = CONTENT
+        k = min(bw / cw, bh / ch)
+        ox, oy = (PAGE_W - cw * k) / 2 - cx * k, (PAGE_H - ch * k) / 2 - cy * k
     badge = f'<div class="c table">طاولة {table} <span>Table {table}</span>{BADGE_DRIPS}</div>' if table else ""
     return f"""<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <style>
@@ -120,7 +131,7 @@ body {{ position: relative; overflow: hidden; background: #130705; color: #fcefe
 .shade {{ position: absolute; inset: 0; background:
   radial-gradient({60 * DES_W / PAGE_W:.1f}% {26 * DES_H / PAGE_H:.1f}% at 50% {(oy + 0.2 * DES_H) / PAGE_H * 100:.1f}%, rgba(255,120,30,.28), transparent 70%),
   linear-gradient(180deg, rgba(19,7,5,.55) 0%, rgba(19,7,5,.2) 50%, rgba(19,7,5,0) 70%); }}
-.design {{ position: absolute; left: {ox}mm; top: {oy}mm; width: {DES_W}mm; height: {DES_H}mm; }}
+.design {{ position: absolute; left: {ox:.3f}mm; top: {oy:.3f}mm; width: {DES_W}mm; height: {DES_H}mm; transform: scale({k:.5f}); transform-origin: 0 0; }}
 .c {{ position: absolute; left: 50%; transform: translateX(-50%); text-align: center; }}
 .logo {{ top: 8mm; width: 21mm; }}
 .glow {{ top: 5.5mm; width: 42mm; height: 42mm; border-radius: 50%;
@@ -167,7 +178,10 @@ def main():
         (f"table-{n:02d}" + ("-17x17" if n in BIG_TABLES else ""), f"{BASE}?t={n}", n, "big" if n in BIG_TABLES else "std")
         for n in range(1, tables + 1)] + [
         # the large-stand tables also get a 7 x 13 cm card
-        (f"table-{n:02d}", f"{BASE}?t={n}", n, "std") for n in sorted(BIG_TABLES) if n <= tables]
+        (f"table-{n:02d}", f"{BASE}?t={n}", n, "std") for n in sorted(BIG_TABLES) if n <= tables] + [
+        # stand sizes: tables 1-6 design 6x12 cm on an 8x14 cm background; table 7 design 8x13 cm on 10x15 cm
+        (f"table-{n:02d}-6x12-on-8x14", f"{BASE}?t={n}", n, "s6") for n in range(1, min(tables, 6) + 1)] + [
+        (f"table-{n:02d}-8x13-on-10x15", f"{BASE}?t={n}", n, "s8") for n in range(7, tables + 1)]
     with open(os.path.join(BUILD, "cards.tsv"), "w") as f:
         for name, url, table, size in cards:
             with open(os.path.join(BUILD, f"{name}.html"), "w", encoding="utf-8") as h:
